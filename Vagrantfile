@@ -27,16 +27,6 @@ Vagrant.configure(2) do |config|
     shell_cmd << "echo '#{k}=#{v}' > /etc/facter/facts.d/fact_#{k}.txt; "
   end
 
-  # Puppet provisioning for all the machines
-  config.vm.provision :puppet do |puppet|
-    puppet.manifests_path = 'puppet/manifests'
-    puppet.manifest_file = 'default.pp'
-    puppet.module_path = [ 'puppet/modules' ]
-    # puppet facter is not working
-    #puppet.facter = {
-    #}
-  end
-
   HOSTS.each do |host, host_info|
     config.vm.define host do |vm|
       vm.vm.hostname = host_info['hostname']
@@ -45,11 +35,24 @@ Vagrant.configure(2) do |config|
       end
       vm.vm.network 'private_network', ip: GLOBAL_FACTS["#{host}_ip"]
       tmp_shell_cmd = shell_cmd
-      tmp_shell_cmd << "echo 'role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
+      tmp_shell_cmd << "echo 'instance_role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
       config.vm.provision :shell do |shell|
         shell.inline = "#{tmp_shell_cmd}"
       end
+      vm.vm.synced_folder 'puppet/hieradata', '/etc/puppet/hieradata'
+      # Puppet provisioning for all the machines
+      vm.vm.provision :puppet do |puppet|
+        puppet.manifests_path = 'puppet/manifests'
+        puppet.manifest_file = 'site.pp'
+        puppet.module_path = [ 'puppet/modules' ]
+        puppet.hiera_config_path = 'puppet/hiera.yaml'
+        # puppet facter is not working
+        #puppet.facter = {
+        #}
+      end
+
     end
   end
+
 
 end
