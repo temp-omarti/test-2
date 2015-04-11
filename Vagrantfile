@@ -38,6 +38,8 @@ Vagrant.configure(2) do |config|
       tmp_shell_cmd << "echo 'instance_role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
       # puppet mysql module needs a newer stdlib library
       tmp_shell_cmd << 'puppet module install --force puppetlabs-stdlib;'
+      # puppet haproxy module needs ripienaar/concat module
+      tmp_shell_cmd << 'if  ! puppet module list | grep ripienaar-concat > /dev/null ; then puppet module install ripienaar/concat; fi;'
       config.vm.provision :shell do |shell|
         shell.inline = "#{tmp_shell_cmd}"
       end
