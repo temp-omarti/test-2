@@ -1,3 +1,6 @@
 [submodule "puppet/modules/mysql"]
 	path = puppet/modules/mysql
 	url = https://github.com/puppetlabs/puppetlabs-mysql.git
+[submodule "puppet/modules/haproxy"]
+	path = puppet/modules/haproxy
+	url = https://github.com/puppetlabs/puppetlabs-haproxy.git
