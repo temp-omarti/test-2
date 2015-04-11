@@ -8,7 +8,7 @@ class instance_roles::roles::db {
   }
 
   # Database creation
-  @@mysql::db { 'publify':
+  @mysql::db { 'publify':
     user     => 'publify',
     password => 'publify_pass',
     host     => $web_ip,
