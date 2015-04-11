@@ -2,9 +2,15 @@
 # vi: set ft=ruby :
 
 GLOBAL_FACTS = {
-"balancer_ip" => "192.168.0.101",
-"web_ip" => "192.168.0.102",
-"db_ip" => "192.168.0.103",
+'balancer_ip' => '192.168.0.101',
+'web_ip' => '192.168.0.102',
+'db_ip' => '192.168.0.103',
+}
+
+HOSTS = {
+'balancer' => {'exposed' => true, 'hostname' => 'blog.example.com', 'role' => 'balancer'},
+'web' => {'exposed' => false, 'hostname' => 'web.example.com', 'role' => 'web'},
+'db' => {'exposed' => false, 'hostname' => 'db.example.com', 'role' => 'db'},
 }
 
 Vagrant.configure(2) do |config|
@@ -15,14 +21,10 @@ Vagrant.configure(2) do |config|
 
   # We are passing facts writing to file 
   # because puppet.facter is not working
-  config.vm.provision :shell do |shell|
-    shell_cmd = ""
-    shell_cmd << "mkdir -p /etc/facter/facts.d/; "
-    GLOBAL_FACTS.each do |k,v|
-      puts k
-      shell_cmd << "echo '#{k}=#{v}' > /etc/facter/facts.d/fact_#{k}.txt; "
-    end
-    shell.inline = "#{shell_cmd}"
+  shell_cmd = ""
+  shell_cmd << "mkdir -p /etc/facter/facts.d/; "
+  GLOBAL_FACTS.each do |k,v|
+    shell_cmd << "echo '#{k}=#{v}' > /etc/facter/facts.d/fact_#{k}.txt; "
   end
 
   # Puppet provisioning for all the machines
@@ -35,23 +37,19 @@ Vagrant.configure(2) do |config|
     #}
   end
 
-  # Database -mysql- virtual machine
-  # Only private network
-  config.vm.define "db" do |db|
-    config.vm.hostname = "blog.example.com"
-    db.vm.network "private_network", ip: GLOBAL_FACTS['db_ip']
+  HOSTS.each do |host, host_info|
+    config.vm.define host do |vm|
+      vm.vm.hostname = host_info['hostname']
+      if host_info['exposed']
+        vm.vm.network "forwarded_port", guest: 80, host:80
+      end
+      vm.vm.network "private_network", ip: GLOBAL_FACTS["#{host}_ip"]
+      tmp_shell_cmd = shell_cmd
+      tmp_shell_cmd << "echo 'role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
+      config.vm.provision :shell do |shell|
+        shell.inline = "#{tmp_shell_cmd}"
+      end
+    end
   end
 
-  # Web server -publify- virtual machine
-  # Only private network
-  config.vm.define "web" do |web|
-    web.vm.network "private_network", ip: GLOBAL_FACTS['web_ip']
-  end
-
-  # Balancer -haproxy- virtual machine
-  # Only private network
-  config.vm.define "balancer" do |balancer|
-    balancer.vm.network "forwarded_port", guest: 80, host:80
-    balancer.vm.network "private_network", ip: GLOBAL_FACTS['balancer_ip']
-  end
 end
