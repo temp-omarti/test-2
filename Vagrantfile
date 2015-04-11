@@ -36,6 +36,8 @@ Vagrant.configure(2) do |config|
       vm.vm.network 'private_network', ip: GLOBAL_FACTS["#{host}_ip"]
       tmp_shell_cmd = shell_cmd
       tmp_shell_cmd << "echo 'instance_role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
+      # puppet mysql module needs a newer stdlib library
+      tmp_shell_cmd << 'puppet module install --force puppetlabs-stdlib;'
       config.vm.provision :shell do |shell|
         shell.inline = "#{tmp_shell_cmd}"
       end
