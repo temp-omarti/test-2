@@ -4,3 +4,9 @@
 [submodule "puppet/modules/haproxy"]
 	path = puppet/modules/haproxy
 	url = https://github.com/puppetlabs/puppetlabs-haproxy.git
+[submodule "puppet/modules/nginx"]
+	path = puppet/modules/nginx
+	url = https://github.com/jfryman/puppet-nginx.git
+[submodule "puppet/modules/vcsrepo"]
+	path = puppet/modules/vcsrepo
+	url = https://github.com/puppetlabs/puppetlabs-vcsrepo.git
