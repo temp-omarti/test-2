@@ -13,14 +13,7 @@ class instance_roles::roles::web {
   class { 'nginx':
     package_source => 'passenger',
     package_name => 'nginx-extras',
-    http_cfg_append => {
-      'server_tokens'  => 'off',
-      'passenger_root' => '/usr/lib/ruby/vendor_ruby/phusion_passenger/locations.ini',
-      'passenger_ruby' => '/usr/bin/ruby',
-      'passenger_max_pool_size' => '30',
-      'passenger_max_requests' => '1000',
-      'passenger_memory_limit' => '150',
-    }
+    # Other configs coming from hieradata
   }
 
   # Nginx Virtualhost with passenger
