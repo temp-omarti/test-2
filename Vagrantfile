@@ -34,13 +34,15 @@ Vagrant.configure(2) do |config|
         vm.vm.network 'forwarded_port', guest: 80, host:80
       end
       vm.vm.network 'private_network', ip: GLOBAL_FACTS["#{host}_ip"]
-      tmp_shell_cmd = shell_cmd
+      tmp_shell_cmd = ''
+      tmp_shell_cmd << shell_cmd
       tmp_shell_cmd << "echo 'instance_role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
       # puppet mysql module needs a newer stdlib library
       tmp_shell_cmd << 'puppet module install --force puppetlabs-stdlib;'
       # puppet haproxy module needs ripienaar/concat module
       tmp_shell_cmd << 'if  ! puppet module list | grep ripienaar-concat > /dev/null ; then puppet module install ripienaar/concat; fi;'
-      config.vm.provision :shell do |shell|
+      tmp_shell_cmd << 'if  ! puppet module list | grep puppetlabs-apt  > /dev/null ; then puppet module install puppetlabs/apt; fi;'
+      vm.vm.provision :shell do |shell|
         shell.inline = "#{tmp_shell_cmd}"
       end
       vm.vm.synced_folder 'puppet/hieradata', '/etc/puppet/hieradata'
