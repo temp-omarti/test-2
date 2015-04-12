@@ -5,6 +5,12 @@ class instance_roles::roles::db {
   class { '::mysql::server':
     root_password           => 'thisisthetest2db',
     remove_default_accounts => true, 
+    restart                 => true,
+    override_options        => {
+      'mysqld'  => {
+        'bind-address' => $db_ip,
+      }
+    }
   }
 
   # Database creation
