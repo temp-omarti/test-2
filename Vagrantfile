@@ -1,12 +1,15 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Info of all the global facts that will 
+# be injected on all the machines
 GLOBAL_FACTS = {
 'balancer_ip' => '192.168.0.101',
 'web_ip' => '192.168.0.102',
 'db_ip' => '192.168.0.103',
 }
 
+# Info of all the hosts we want to create
 HOSTS = {
 'db' => {'exposed' => false, 'hostname' => 'db.example.com', 'role' => 'db'},
 'web' => {'exposed' => false, 'hostname' => 'web.example.com', 'role' => 'web'},
@@ -27,13 +30,19 @@ Vagrant.configure(2) do |config|
     shell_cmd << "echo '#{k}=#{v}' > /etc/facter/facts.d/fact_#{k}.txt; "
   end
 
+  # Generating all the info for the hosts
   HOSTS.each do |host, host_info|
     config.vm.define host do |vm|
+      # Hostnames and networking
       vm.vm.hostname = host_info['hostname']
       if host_info['exposed']
         vm.vm.network 'forwarded_port', guest: 80, host:80
       end
       vm.vm.network 'private_network', ip: GLOBAL_FACTS["#{host}_ip"]
+
+      # Shell comands to provision
+      # We are going to install all the puppet modules
+      # not related directly with the project
       tmp_shell_cmd = ''
       tmp_shell_cmd << shell_cmd
       tmp_shell_cmd << "echo 'instance_role=#{host_info['role']}' > /etc/facter/facts.d/fact_role.txt; "
@@ -45,6 +54,8 @@ Vagrant.configure(2) do |config|
       vm.vm.provision :shell do |shell|
         shell.inline = "#{tmp_shell_cmd}"
       end
+
+      # Syncing hieradata directory
       vm.vm.synced_folder 'puppet/hieradata', '/etc/puppet/hieradata'
       # Puppet provisioning for all the machines
       vm.vm.provision :puppet do |puppet|
@@ -56,9 +67,6 @@ Vagrant.configure(2) do |config|
         #puppet.facter = {
         #}
       end
-
     end
   end
-
-
 end
