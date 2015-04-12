@@ -11,9 +11,9 @@ class instance_roles::roles::balancer {
       ],
       retries  => '3',
       maxconn  => '20000',
-      contimeout => '2000',
+      contimeout => '20000',
       clitimeout => '2000',
-      srvtimeout => '2000',
+      srvtimeout => '6000',
     }
   }
   haproxy::listen { 'puppet00':
