@@ -8,9 +8,9 @@ GLOBAL_FACTS = {
 }
 
 HOSTS = {
-'balancer' => {'exposed' => true, 'hostname' => 'blog.example.com', 'role' => 'balancer'},
-'web' => {'exposed' => false, 'hostname' => 'web.example.com', 'role' => 'web'},
 'db' => {'exposed' => false, 'hostname' => 'db.example.com', 'role' => 'db'},
+'web' => {'exposed' => false, 'hostname' => 'web.example.com', 'role' => 'web'},
+'balancer' => {'exposed' => true, 'hostname' => 'blog.example.com', 'role' => 'balancer'},
 }
 
 Vagrant.configure(2) do |config|
